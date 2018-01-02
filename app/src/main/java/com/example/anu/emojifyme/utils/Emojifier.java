@@ -54,7 +54,27 @@ public class Emojifier {
          */
         if (faceSparseArray.size() == 0)
             Toast.makeText(context, context.getResources().getString(R.string.no_face_detected), Toast.LENGTH_SHORT).show();
+        else {
+            for (int i=0; i<faceSparseArray.size(); i++){
+                Face face = faceSparseArray.valueAt(i);
+
+                /**
+                 * log the classification probabilites for each face
+                 */
+                getClassifications(face);
+            }
+        }
 
         faceDetector.release();
+    }
+
+    /**
+     * method to log the classification probabilities
+     * it logs the probability of each eye being open and that the person is smiling
+     */
+    public static void getClassifications(Face face){
+        Log.d(TAG, "smiimg : " + face.getIsSmilingProbability());
+        Log.d(TAG, "left eye open : " + face.getIsLeftEyeOpenProbability());
+        Log.d(TAG, "right eye open : " + face.getIsRightEyeOpenProbability());
     }
 }
