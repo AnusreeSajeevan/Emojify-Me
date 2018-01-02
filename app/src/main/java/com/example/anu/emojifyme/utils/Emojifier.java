@@ -54,5 +54,7 @@ public class Emojifier {
          */
         if (faceSparseArray.size() == 0)
             Toast.makeText(context, context.getResources().getString(R.string.no_face_detected), Toast.LENGTH_SHORT).show();
+
+        faceDetector.release();
     }
 }
