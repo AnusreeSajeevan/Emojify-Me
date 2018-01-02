@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.example.anu.emojifyme.R;
 import com.example.anu.emojifyme.utils.BitmapUtils;
+import com.example.anu.emojifyme.utils.Emojifier;
 
 import java.io.File;
 import java.io.IOException;
@@ -193,6 +194,11 @@ public class MainActivity extends AppCompatActivity {
         bitmapImage = BitmapUtils.resamplePic(this, mImageFilePath);
 
         imageView.setImageBitmap(bitmapImage);
+
+        /**
+         * detect the number of faces
+         */
+        Emojifier.detectFaces(this, bitmapImage);
 
         toggleViewVisibility();
     }
