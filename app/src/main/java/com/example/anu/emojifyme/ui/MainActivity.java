@@ -29,6 +29,7 @@ import java.io.IOException;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -62,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * method to launch the camera app
+     *
      * @param view the "GO" button
      */
     public void emojifyMe(View view) {
@@ -70,13 +72,13 @@ public class MainActivity extends AppCompatActivity {
          * check for external storage permission
          */
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
-                PackageManager.PERMISSION_GRANTED){
+                PackageManager.PERMISSION_GRANTED) {
             /**
              * if you do not have the permission, request it
              */
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_STORAGE_PERMISSION);
-        }else {
+        } else {
             /**
              * launch camera if permission is granted
              */
@@ -86,21 +88,22 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * method called when you request permission to read or write to external storage
+     *
      * @param requestCode
      * @param permissions
      * @param grantResults
      */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode){
+        switch (requestCode) {
             case REQUEST_STORAGE_PERMISSION:
                 if (grantResults.length > 0 &&
-                        grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                        grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     /**
                      * if you get the permission, launch the camera
                      */
                     launchCamera();
-                }else {
+                } else {
                     /**
                      * if you do not get the permission, show a toast message
                      */
@@ -123,16 +126,15 @@ public class MainActivity extends AppCompatActivity {
         /**
          * ensure that there is an activity to handle camera intent
          */
-        if (intentImageCapture.resolveActivity(getPackageManager()) != null){
+        if (intentImageCapture.resolveActivity(getPackageManager()) != null) {
 
             /**
              * crate  temporary file to sore the image
              */
             File imageFile = null;
-            try{
+            try {
                 imageFile = BitmapUtils.createTempImageFile(this);
-            }
-            catch (IOException e){
+            } catch (IOException e) {
                 /**
                  * error while creating file
                  */
@@ -142,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
             /**
              * continue only if the file has been successfully created
              */
-            if (imageFile != null){
+            if (imageFile != null) {
 
                 /**
                  * get the path of the created file
@@ -173,10 +175,9 @@ public class MainActivity extends AppCompatActivity {
         /**
          * if the image capture intent was called and was successfull
          */
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK){
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             processImage();
-        }
-        else {
+        } else {
             /**
              * otherwise delete the temporary image file
              */
@@ -217,6 +218,7 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * method to reset app to original state
+     *
      * @param view clear image button
      */
     public void clearImage(View view) {
@@ -239,6 +241,7 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * method to save the captured image
+     *
      * @param view save me button
      */
     public void saveMe(View view) {
@@ -256,6 +259,7 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * method to share image
+     *
      * @param view share button
      */
     public void shareMe(View view) {
@@ -276,4 +280,21 @@ public class MainActivity extends AppCompatActivity {
         );
     }
 
+    @OnClick({R.id.emojify_button, R.id.clear_button, R.id.save_button, R.id.share_button})
+    public void onViewClicked(View view) {
+        switch (view.getId()) {
+            case R.id.emojify_button:
+                launchCamera();
+                break;
+            case R.id.clear_button:
+                clearImage(view);
+                break;
+            case R.id.save_button:
+                saveMe(view);
+                break;
+            case R.id.share_button:
+                shareMe(view);
+                break;
+        }
+    }
 }
