@@ -193,12 +193,13 @@ public class MainActivity extends AppCompatActivity {
          */
         bitmapImage = BitmapUtils.resamplePic(this, mImageFilePath);
 
+        /**
+         * detect faces and overlay emojis
+         */
+        bitmapImage = Emojifier.detectFacesAndOverlayEmoji(this, bitmapImage);
+
         imageView.setImageBitmap(bitmapImage);
 
-        /**
-         * detect the number of faces
-         */
-        Emojifier.detectFaces(this, bitmapImage);
 
         toggleViewVisibility();
     }

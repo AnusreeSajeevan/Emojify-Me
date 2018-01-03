@@ -2,11 +2,14 @@ package com.example.anu.emojifyme.utils;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.util.Log;
 import android.util.SparseArray;
 import android.widget.Toast;
 
 import com.example.anu.emojifyme.R;
+import com.google.android.gms.common.data.BitmapTeleporter;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
@@ -25,12 +28,14 @@ public class Emojifier {
     private static final double SMILING_PROB_THRESHOLD = .15;
     private static final double EYE_OPEN_PROB_THRESHOLD = .15;
 
+    private static final float EMOJI_SCALE_FACTOR = .9f;
+
     /**
      * method to detect faces
      * @param context called context
      * @param bitmap bitmap of the picture in which to detect faces
      */
-    public static void detectFaces(Context context, Bitmap bitmap){
+    public static Bitmap detectFacesAndOverlayEmoji(Context context, Bitmap bitmap){
         /**
          * create face detector, disable tracking and enable classifications
          */
@@ -53,7 +58,11 @@ public class Emojifier {
          * log the number of faces detected
          */
         Log.d(TAG, "Number of faces detected : " + faceSparseArray.size());
-        Toast.makeText(context, "Number of faces detected : " + faceSparseArray.size(), Toast.LENGTH_SHORT).show();
+
+        /**
+         * initialize the resultBitmap to original image
+         */
+        Bitmap resultBitmap = bitmap;
 
         /**
          * toast a message if no faces is detected
@@ -65,20 +74,62 @@ public class Emojifier {
                 Face face = faceSparseArray.valueAt(i);
 
                 /**
-                 * log the classification probabilites for each face
+                 * bitmap to hold the emoji
                  */
-                whichEmoji(face);
+                Bitmap bitmapEmoji;
+
+                switch (whichEmoji(face)){
+                    case SMILE:
+                        bitmapEmoji = BitmapFactory.decodeResource(context.getResources(),
+                                R.drawable.smile);
+                        break;
+                    case FROWN:
+                        bitmapEmoji = BitmapFactory.decodeResource(context.getResources(),
+                                R.drawable.frown);
+                        break;
+                    case LEFT_WINK:
+                        bitmapEmoji = BitmapFactory.decodeResource(context.getResources(),
+                                R.drawable.leftwink);
+                        break;
+                    case RIGHT_WINK:
+                        bitmapEmoji = BitmapFactory.decodeResource(context.getResources(),
+                                R.drawable.rightwink);
+                        break;
+                    case LEFT_WINK_FROWN:
+                        bitmapEmoji = BitmapFactory.decodeResource(context.getResources(),
+                                R.drawable.leftwinkfrown);
+                        break;
+                    case RIGHT_WINK_FROWN:
+                        bitmapEmoji = BitmapFactory.decodeResource(context.getResources(),
+                                R.drawable.rightwinkfrown);
+                        break;
+                    case CLOSED_EYE_SMILE:
+                        bitmapEmoji = BitmapFactory.decodeResource(context.getResources(),
+                                R.drawable.closed_smile);
+                        break;
+                    case CLOSED_EYE_FROWN:
+                        bitmapEmoji = BitmapFactory.decodeResource(context.getResources(),
+                                R.drawable.closed_frown);
+                        break;
+                    default:
+                        bitmapEmoji = null;
+                        Toast.makeText(context, R.string.no_emoji, Toast.LENGTH_SHORT).show();
+                }
+
+                // Add the emojiBitmap to the proper position in the original image
+                resultBitmap = addBitmapToFace(resultBitmap, bitmapEmoji, face);
             }
         }
 
         faceDetector.release();
+        return resultBitmap;
     }
 
     /**
      * method to log the classification probabilities
      * it logs the probability of each eye being open and that the person is smiling
      */
-    public static void whichEmoji(Face face){
+    public static Emoji whichEmoji(Face face){
         Log.d(TAG, "smiimg : " + face.getIsSmilingProbability());
         Log.d(TAG, "left eye open : " + face.getIsLeftEyeOpenProbability());
         Log.d(TAG, "right eye open : " + face.getIsRightEyeOpenProbability());
@@ -119,6 +170,7 @@ public class Emojifier {
         }
 
         Log.d(TAG, "emoji : " + emoji.name());
+        return emoji;
     }
 
     /**
@@ -134,5 +186,45 @@ public class Emojifier {
         RIGHT_WINK_FROWN,
         CLOSED_EYE_SMILE,
         CLOSED_EYE_FROWN
+    }
+
+    /**
+     * Combines the original picture with the emoji bitmaps
+     *
+     * @param backgroundBitmap The original picture
+     * @param emojiBitmap      The chosen emoji
+     * @param face             The detected face
+     * @return The final bitmap, including the emojis over the faces
+     */
+    private static Bitmap addBitmapToFace(Bitmap backgroundBitmap, Bitmap emojiBitmap, Face face) {
+
+        // Initialize the results bitmap to be a mutable copy of the original image
+        Bitmap resultBitmap = Bitmap.createBitmap(backgroundBitmap.getWidth(),
+                backgroundBitmap.getHeight(), backgroundBitmap.getConfig());
+
+        // Scale the emoji so it looks better on the face
+        float scaleFactor = EMOJI_SCALE_FACTOR;
+
+        // Determine the size of the emoji to match the width of the face and preserve aspect ratio
+        int newEmojiWidth = (int) (face.getWidth() * scaleFactor);
+        int newEmojiHeight = (int) (emojiBitmap.getHeight() *
+                newEmojiWidth / emojiBitmap.getWidth() * scaleFactor);
+
+
+        // Scale the emoji
+        emojiBitmap = Bitmap.createScaledBitmap(emojiBitmap, newEmojiWidth, newEmojiHeight, false);
+
+        // Determine the emoji position so it best lines up with the face
+        float emojiPositionX =
+                (face.getPosition().x + face.getWidth() / 2) - emojiBitmap.getWidth() / 2;
+        float emojiPositionY =
+                (face.getPosition().y + face.getHeight() / 2) - emojiBitmap.getHeight() / 3;
+
+        // Create the canvas and draw the bitmaps to it
+        Canvas canvas = new Canvas(resultBitmap);
+        canvas.drawBitmap(backgroundBitmap, 0, 0, null);
+        canvas.drawBitmap(emojiBitmap, emojiPositionX, emojiPositionY, null);
+
+        return resultBitmap;
     }
 }
