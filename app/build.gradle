@@ -32,4 +32,7 @@ dependencies {
 
     //google mobile vision library dependency
     compile 'com.google.android.gms:play-services-vision:10.2.0'
+
+    //timber dependency
+    compile 'com.jakewharton.timber:timber:4.6.0'
 }

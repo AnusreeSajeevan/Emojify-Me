@@ -14,6 +14,8 @@ import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
 
+import timber.log.Timber;
+
 /**
  * Created by Design on 02-01-2018.
  */
@@ -57,7 +59,7 @@ public class Emojifier {
         /**
          * log the number of faces detected
          */
-        Log.d(TAG, "Number of faces detected : " + faceSparseArray.size());
+        Timber.d("Number of faces detected : " + faceSparseArray.size());
 
         /**
          * initialize the resultBitmap to original image
@@ -130,9 +132,9 @@ public class Emojifier {
      * it logs the probability of each eye being open and that the person is smiling
      */
     public static Emoji whichEmoji(Face face){
-        Log.d(TAG, "smiimg : " + face.getIsSmilingProbability());
-        Log.d(TAG, "left eye open : " + face.getIsLeftEyeOpenProbability());
-        Log.d(TAG, "right eye open : " + face.getIsRightEyeOpenProbability());
+        Timber.d("smiimg : " + face.getIsSmilingProbability());
+        Timber.d("left eye open : " + face.getIsLeftEyeOpenProbability());
+        Timber.d("right eye open : " + face.getIsRightEyeOpenProbability());
 
         /**
          * variables to track the state of the facial expression based on the thresholds
@@ -169,7 +171,7 @@ public class Emojifier {
             }
         }
 
-        Log.d(TAG, "emoji : " + emoji.name());
+        Timber.d("emoji : " + emoji.name());
         return emoji;
     }
 
